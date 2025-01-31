@@ -11,6 +11,7 @@ namespace Mediapipe.Unity.Sample
     private static WebCamSource _WebCamSource;
     private static StaticImageSource _StaticImageSource;
     private static VideoSource _VideoSource;
+    private static RealSenseSource _RealSenseSource;
 
     public static ImageSource ImageSource { get; private set; }
 
@@ -34,11 +35,12 @@ namespace Mediapipe.Unity.Sample
       }
     }
 
-    internal static void Initialize(WebCamSource webCamSource, StaticImageSource staticImageSource, VideoSource videoSource)
+    internal static void Initialize(WebCamSource webCamSource, StaticImageSource staticImageSource, VideoSource videoSource, RealSenseSource realSenseSource)
     {
       _WebCamSource = webCamSource;
       _StaticImageSource = staticImageSource;
       _VideoSource = videoSource;
+      _RealSenseSource = realSenseSource;
     }
 
     public static void Switch(ImageSourceType imageSourceType)
@@ -58,6 +60,11 @@ namespace Mediapipe.Unity.Sample
         case ImageSourceType.Video:
           {
             ImageSource = _VideoSource;
+            break;
+          }
+        case ImageSourceType.RealSense:
+          {
+            ImageSource = _RealSenseSource;
             break;
           }
         case ImageSourceType.Unknown:

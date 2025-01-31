@@ -33,3 +33,8 @@ Packages/com.github.homuler.mediapipe/PackageResources/MediaPipe/*
 Packages/com.github.homuler.mediapipe/PackageResources/MediaPipe/object_detection_3d.bytes.meta
 Packages/com.github.homuler.mediapipe/Runtime/Plugins/Protobuf/*.dll
 Packages/PackageResources/MediaPipe/*
+/Packages/Microsoft.Unity.Analyzers.1.19.0
+/Packages/Google.Protobuf.3.20.0
+/Packages/ErrorProne.NET.CoreAnalyzers.0.4.0-beta.1
+/Packages/ErrorProne.NET.Structs.0.4.0-beta.1
+/Packages/System.Runtime.CompilerServices.Unsafe.4.5.2

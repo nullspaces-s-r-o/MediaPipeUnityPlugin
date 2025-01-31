@@ -87,5 +87,7 @@ namespace Mediapipe.Unity.Sample
     );
 
     public VideoSource BuildVideoSource() => new VideoSource(_availableVideoSources);
+
+    public RealSenseSource BuildRealSenseSource() => new RealSenseSource(_preferredDefaultWebCamWidth, _defaultAvailableStaticImageResolutions);
   }
 }

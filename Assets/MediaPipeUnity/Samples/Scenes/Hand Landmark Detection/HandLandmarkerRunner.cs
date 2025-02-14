@@ -77,6 +77,15 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
       var tStart = DateTime.Now;
       int nframes = 0;
 
+      // create new array of 3D hand landmarks programically
+      var gameObjects = new GameObject[21];
+      for (int i = 0; i < 21; i++)
+      {
+        gameObjects[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        gameObjects[i].transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+        gameObjects[i].transform.transform.position = new Vector3(i, 0, 0);
+      }
+
       while (true)
       {
         if (isPaused)
@@ -143,41 +152,57 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
                   // de-normalize the hand landmarks, for single hand now
                   var handLandmarks = result.handLandmarks[0];
 
-                  var wristNormalized = handLandmarks.landmarks[0];
-                  var nx = wristNormalized.x;
-                  var ny = wristNormalized.y;
-
-                  var x = nx * colorIntrin.width;
-                  var y = ny * colorIntrin.height;
-
-                  if (0 <= x && x < colorIntrin.width && 0 <= y && y < colorIntrin.height)
+                  var origin = new Vector3();
+                  for (int i = 0; i < 21; i++)
                   {
-                    var vx = (x - colorIntrin.ppx) / colorIntrin.fx;
-                    var vy = (y - colorIntrin.ppy) / colorIntrin.fy;
+                    var wristNormalized = handLandmarks.landmarks[i];
+                    var nx = wristNormalized.x;
+                    var ny = wristNormalized.y;
 
-                    // Get the raw texture data
-                    byte[] rawData = depthTexture.GetRawTextureData();
+                    var x = nx * colorIntrin.width;
+                    var y = ny * colorIntrin.height;
 
-                    // Calculate the index of the pixel
-                    int index = (int)y * depthTexture.width * 2 + (int)x * 2;
-
-                    // Convert the byte data to ushort
-                    ushort pixelValue = BitConverter.ToUInt16(rawData, index);
-
-                    var vz = pixelValue * 0.001f;
-
-                    // Locate 'wrist' game object
-                    var wrist = GameObject.Find("Wrist");
-                    if (wrist)
+                    if (0 <= x && x < colorIntrin.width && 0 <= y && y < colorIntrin.height)
                     {
-                      wrist.transform.position = new Vector3(vx, vy, vz);
-                    }
-                    else
-                    {
-                      Debug.LogWarning("Wrist game object not found");
-                    }
+                      var vx = (x - colorIntrin.ppx) / colorIntrin.fx;
+                      var vy = (y - colorIntrin.ppy) / colorIntrin.fy;
 
-                    //Debug.Log($"Wrist: {vx}, {vy}, {vz}");
+                      if (i == 0)
+                      {
+                        // Get the raw texture data
+                        byte[] rawData = depthTexture.GetRawTextureData();
+
+                        // Calculate the index of the pixel
+                        int index = (int)y * depthTexture.width * 2 + (int)x * 2;
+
+                        // Convert the byte data to ushort
+                        ushort pixelValue = BitConverter.ToUInt16(rawData, index);
+
+                        var vz = pixelValue * 0.001f;
+
+                        origin = new Vector3(vx, vy, vz);
+                      }
+
+                      // Locate 'wrist' game object
+                      var lm = gameObjects[i];
+                      if (lm)
+                      {
+                        if (i == 0)
+                        {
+                          lm.transform.position = origin;
+                        }
+                        else
+                        {
+                          lm.transform.position = new Vector3(vx, vy, origin.z + wristNormalized.z);
+                        }
+                      }
+                      else
+                      {
+                        Debug.LogWarning("Wrist game object not found");
+                      }
+
+                      //Debug.Log($"Wrist: {vx}, {vy}, {vz}");
+                    }
                   }
                 }
               }

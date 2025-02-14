@@ -4,6 +4,7 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
+using Intel.RealSense;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,7 +18,12 @@ using UnityEngine.Android;
 
 namespace Mediapipe.Unity
 {
-  public class RealSenseSource : ImageSource
+  public interface IDepthSource
+  {
+    Texture2D GetDepthTexture();
+  }
+
+  public class RealSenseSource : ImageSource, IDepthSource
   {
     public Intel.RealSense.Pipeline pipeline;
 
@@ -208,12 +214,11 @@ namespace Mediapipe.Unity
 
     public override Texture GetCurrentTexture()
     {
-
-
       if (pipeline != null)
       {
         var frames = pipeline.WaitForFrames();
-        var alignedDepth = align.Process(frames).As<Intel.RealSense.VideoFrame>();
+        var alignedFrame = align.Process(frames);
+        var alignedFrameset = alignedFrame.As<FrameSet>();
 
         var colorFrame = frames.ColorFrame;
         if (texture == null)
@@ -222,14 +227,20 @@ namespace Mediapipe.Unity
         }
         texture.LoadRawTextureData(colorFrame.Data, colorFrame.Stride * colorFrame.Height);
         texture.Apply();
-        //colorFrame.Dispose();
+        colorFrame.Dispose();
 
-        var depthFrame = alignedDepth;
+
+        var depthFrame = alignedFrameset.DepthFrame;
         if (depthTexture == null)
         {
           depthTexture = new Texture2D(depthFrame.Width, depthFrame.Height, TextureFormat.R16, false, true);
         }
         depthTexture.LoadRawTextureData(depthFrame.Data, depthFrame.Stride * depthFrame.Height);
+        depthFrame.Dispose();
+
+        alignedFrame.Dispose();
+        alignedFrameset.Dispose();
+        frames.Dispose(); // https://github.com/IntelRealSense/librealsense/blob/master/wrappers/csharp/Documentation/pinvoke.md
       }
 
       return texture;
@@ -244,6 +255,8 @@ namespace Mediapipe.Unity
       var resolutions = availableResolutions;
       return resolutions == null || resolutions.Length == 0 ? new ResolutionStruct() : resolutions.OrderBy(resolution => resolution, new ResolutionStructComparer(_preferableDefaultWidth)).First();
     }
+
+    public Texture2D GetDepthTexture() => depthTexture;
 
     //private void InitializeWebCamTexture()
     //{

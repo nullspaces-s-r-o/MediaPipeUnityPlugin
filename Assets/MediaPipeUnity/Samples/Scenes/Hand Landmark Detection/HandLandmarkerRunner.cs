@@ -4,6 +4,7 @@
 // license that can be found in the LICENSE file or at
 // https://opensource.org/licenses/MIT.
 
+using System;
 using System.Collections;
 using Mediapipe.Tasks.Vision.HandLandmarker;
 using UnityEngine;
@@ -73,6 +74,9 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
       var canUseGpuImage = SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3 && GpuManager.GpuResources != null;
       using var glContext = canUseGpuImage ? GpuManager.GetGlContext() : null;
 
+      var tStart = DateTime.Now;
+      int nframes = 0;
+
       while (true)
       {
         if (isPaused)
@@ -128,6 +132,11 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
             if (taskApi.TryDetect(image, imageProcessingOptions, ref result))
             {
               _handLandmarkerResultAnnotationController.DrawNow(result);
+
+              if (imageSource is IDepthSource depthSource)
+              {
+                var deptTexture = depthSource.GetDepthTexture();
+              }
             }
             else
             {
@@ -147,6 +156,20 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
           case Tasks.Vision.Core.RunningMode.LIVE_STREAM:
             taskApi.DetectAsync(image, GetCurrentTimestampMillisec(), imageProcessingOptions);
             break;
+          default:
+            break;
+        }
+
+        var tEnd = DateTime.Now;
+        var elapsed = tEnd - tStart;
+
+        ++nframes;
+
+        if (elapsed.TotalSeconds > 5.0)
+        {
+          Debug.Log($"FPS: {nframes / elapsed.TotalSeconds}");
+          tStart = tEnd;
+          nframes = 0;
         }
       }
     }

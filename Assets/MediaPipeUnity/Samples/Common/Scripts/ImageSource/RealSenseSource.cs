@@ -47,8 +47,8 @@ namespace Mediapipe.Unity
     public override int textureWidth => 1280;
     public override int textureHeight => 720;
 
-    public override bool isVerticallyFlipped => false;
-    public override bool isFrontFacing => true;
+    public override bool isVerticallyFlipped => true;
+    public override bool isFrontFacing => false;
     public override RotationAngle rotation => RotationAngle.Rotation0;
 
 

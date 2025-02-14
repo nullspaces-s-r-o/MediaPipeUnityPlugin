@@ -135,7 +135,40 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 
               if (imageSource is IDepthSource depthSource)
               {
-                var deptTexture = depthSource.GetDepthTexture();
+                var depthTexture = depthSource.GetDepthTexture();
+                if (imageSource is IColorSource colorSource)
+                {
+                  var colorIntrin = colorSource.GetIntrin();
+
+                  // de-normalize the hand landmarks, for single hand now
+                  var handLandmarks = result.handLandmarks[0];
+
+                  var wristNormalized = handLandmarks.landmarks[0];
+                  var nx = wristNormalized.x;
+                  var ny = wristNormalized.y;
+
+                  var x = nx * colorIntrin.width;
+                  var y = ny * colorIntrin.height;
+
+                  if (0 <= x && x < colorIntrin.width && 0 <= y && y < colorIntrin.height)
+                  {
+                    var vx = (x - colorIntrin.ppx) / colorIntrin.fx;
+                    var vy = (y - colorIntrin.ppy) / colorIntrin.fy;
+
+                    // Get the raw texture data
+                    byte[] rawData = depthTexture.GetRawTextureData();
+
+                    // Calculate the index of the pixel
+                    int index = (int)y * depthTexture.width * 2 + (int)x * 2;
+
+                    // Convert the byte data to ushort
+                    ushort pixelValue = BitConverter.ToUInt16(rawData, index);
+
+                    var vz = (float)pixelValue * 0.001;
+
+                    //Debug.Log($"Wrist: {vx}, {vy}, {vz}");
+                  }
+                }
               }
             }
             else

@@ -93,7 +93,7 @@ namespace Mediapipe.Tasks.Vision.HandLandmarker
         taskOptions: options);
 
       return new HandLandmarker(
-        taskInfo.GenerateGraphConfig(options.runningMode == Core.RunningMode.LIVE_STREAM),
+        taskInfo.GenerateGraphConfig(options.runningMode == Core.RunningMode.VIDEO),
         options.runningMode,
         gpuResources,
         BuildPacketsCallback(options));

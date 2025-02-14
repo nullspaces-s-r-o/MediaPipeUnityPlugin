@@ -162,6 +162,7 @@ namespace Mediapipe.Unity
       pipeline = new Intel.RealSense.Pipeline();
       var config = new Intel.RealSense.Config();
       config.EnableStream(Intel.RealSense.Stream.Color, 1280, 720, Intel.RealSense.Format.Rgb8, 30);
+      config.EnableStream(Intel.RealSense.Stream.Depth, 1280, 720);
 
       pipeline.Start(config);
 
@@ -193,7 +194,7 @@ namespace Mediapipe.Unity
 
     public override void Stop()
     {
-      if(pipeline != null)
+      if (pipeline != null)
       {
         pipeline.Stop();
         pipeline.Dispose();
@@ -202,28 +203,41 @@ namespace Mediapipe.Unity
     }
 
     private Texture2D texture = null;
+    private Texture2D depthTexture = null;
+    private Intel.RealSense.Align align = new Intel.RealSense.Align(Intel.RealSense.Stream.Color);
 
     public override Texture GetCurrentTexture()
     {
 
 
-      if(pipeline != null)
+      if (pipeline != null)
       {
         var frames = pipeline.WaitForFrames();
+        var alignedDepth = align.Process(frames).As<Intel.RealSense.VideoFrame>();
+
         var colorFrame = frames.ColorFrame;
         if (texture == null)
         {
           texture = new Texture2D(colorFrame.Width, colorFrame.Height, TextureFormat.RGB24, false, true);
         }
         texture.LoadRawTextureData(colorFrame.Data, colorFrame.Stride * colorFrame.Height);
-        colorFrame.Dispose();
-        frames.Dispose();
         texture.Apply();
+        //colorFrame.Dispose();
+
+        var depthFrame = alignedDepth;
+        if (depthTexture == null)
+        {
+          depthTexture = new Texture2D(depthFrame.Width, depthFrame.Height, TextureFormat.R16, false, true);
+        }
+        depthTexture.LoadRawTextureData(depthFrame.Data, depthFrame.Stride * depthFrame.Height);
       }
 
       return texture;
       //return webCamTexture;
     }
+
+    // deproject pixel to point usin intel realsense api
+
 
     private ResolutionStruct GetDefaultResolution()
     {

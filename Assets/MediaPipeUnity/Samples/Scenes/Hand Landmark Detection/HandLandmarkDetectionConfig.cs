@@ -19,7 +19,7 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
 
     public ImageReadMode ImageReadMode { get; set; } = ImageReadMode.CPUAsync;
 
-    public Tasks.Vision.Core.RunningMode RunningMode { get; set; } = Tasks.Vision.Core.RunningMode.LIVE_STREAM;
+    public Tasks.Vision.Core.RunningMode RunningMode { get; set; } = Tasks.Vision.Core.RunningMode.IMAGE;
 
     public int NumHands { get; set; } = 1;
     public float MinHandDetectionConfidence { get; set; } = 0.5f;

@@ -164,7 +164,18 @@ namespace Mediapipe.Unity.Sample.HandLandmarkDetection
                     // Convert the byte data to ushort
                     ushort pixelValue = BitConverter.ToUInt16(rawData, index);
 
-                    var vz = (float)pixelValue * 0.001;
+                    var vz = pixelValue * 0.001f;
+
+                    // Locate 'wrist' game object
+                    var wrist = GameObject.Find("Wrist");
+                    if (wrist)
+                    {
+                      wrist.transform.position = new Vector3(vx, vy, vz);
+                    }
+                    else
+                    {
+                      Debug.LogWarning("Wrist game object not found");
+                    }
 
                     //Debug.Log($"Wrist: {vx}, {vy}, {vz}");
                   }

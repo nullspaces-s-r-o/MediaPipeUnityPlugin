@@ -18,12 +18,26 @@ using UnityEngine.Android;
 
 namespace Mediapipe.Unity
 {
+  public interface IColorSource
+  {
+    public struct Intrin
+    {
+      public float width;
+      public float height;
+      public float ppx;
+      public float ppy;
+      public float fx;
+      public float fy;
+    }
+
+    Intrin GetIntrin();
+  }
   public interface IDepthSource
   {
     Texture2D GetDepthTexture();
   }
 
-  public class RealSenseSource : ImageSource, IDepthSource
+  public class RealSenseSource : ImageSource, IDepthSource, IColorSource
   {
     public Intel.RealSense.Pipeline pipeline;
 
@@ -224,6 +238,15 @@ namespace Mediapipe.Unity
         if (texture == null)
         {
           texture = new Texture2D(colorFrame.Width, colorFrame.Height, TextureFormat.RGB24, false, true);
+
+          var intrin = colorFrame.Profile.As<VideoStreamProfile>().GetIntrinsics();
+          colorIntrin.width = intrin.width;
+          colorIntrin.height = intrin.height;
+          colorIntrin.ppx = intrin.ppx;
+          colorIntrin.ppy = intrin.ppy;
+          colorIntrin.fx = intrin.fx;
+          colorIntrin.fy = intrin.fy;
+
         }
         texture.LoadRawTextureData(colorFrame.Data, colorFrame.Stride * colorFrame.Height);
         texture.Apply();
@@ -257,6 +280,12 @@ namespace Mediapipe.Unity
     }
 
     public Texture2D GetDepthTexture() => depthTexture;
+
+    IColorSource.Intrin colorIntrin;
+
+    public IColorSource.Intrin GetIntrin() {
+      return colorIntrin;
+    }
 
     //private void InitializeWebCamTexture()
     //{
